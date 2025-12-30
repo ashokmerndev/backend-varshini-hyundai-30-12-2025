@@ -34,7 +34,8 @@ const app = express();
  */
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    // .env lo value unna lekapoyina, 8080 ni kuda allow chestundi
+    origin: [process.env.FRONTEND_URL, 'http://localhost:8080', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],

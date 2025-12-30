@@ -11,12 +11,21 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Product name is required'],
       trim: true,
     },
+    // Display Part Number (e.g., "86511-C9000")
     partNumber: {
       type: String,
       required: [true, 'Part number is required'],
       unique: true,
       trim: true,
       uppercase: true,
+    },
+    // HIDDEN FIELD: Searchable Part Number (e.g., "86511c9000")
+    // Helps when users search without dashes or spaces
+    sanitizedPartNumber: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      index: true 
     },
     description: {
       type: String,
@@ -25,17 +34,27 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Category is required'],
-      enum: ['Engine', 'Brake', 'Electrical', 'Body', 'Accessories', 'Suspension', 'Transmission', 'Interior', 'Exterior'],
+      // Categories are stable, so Enums are fine here
+      enum: ['Engine', 'Brake', 'Electrical', 'Body', 'Accessories', 'Suspension', 'Transmission', 'Interior', 'Exterior', 'Service Parts'],
     },
     subcategory: {
       type: String,
       trim: true,
     },
+    // MAJOR UPDATE: Improved Compatibility Logic
+    // Instead of just a string, we now store Model + Year Range
     compatibleModels: [
       {
-        type: String,
-        enum: ['i10', 'i20', 'Creta', 'Verna', 'Venue', 'Elantra', 'Tucson', 'Kona', 'Alcazar', 'Aura', 'Grand i10 Nios', 'Santro'],
-      },
+        modelName: { 
+          type: String, 
+          required: true,
+          trim: true 
+          // Note: Enum removed to allow new car launches (e.g., Exter, Ioniq 5)
+        },
+        yearFrom: { type: Number, required: true }, // e.g., 2015
+        yearTo: { type: Number }, // e.g., 2020 (If null/undefined, it means "Till Date")
+        variant: { type: String, trim: true } // Optional: e.g., "Petrol", "Diesel", "Sportz"
+      }
     ],
     price: {
       type: Number,
@@ -47,6 +66,7 @@ const productSchema = new mongoose.Schema(
       min: [0, 'Discount price cannot be negative'],
       validate: {
         validator: function (value) {
+          // If discountPrice is present, it must be less than price
           return !value || value < this.price;
         },
         message: 'Discount price must be less than original price',
@@ -61,11 +81,7 @@ const productSchema = new mongoose.Schema(
     stockStatus: {
       type: String,
       enum: ['In Stock', 'Low Stock', 'Out of Stock'],
-      default: function () {
-        if (this.stock === 0) return 'Out of Stock';
-        if (this.stock <= 5) return 'Low Stock';
-        return 'In Stock';
-      },
+      default: 'Out of Stock', // Safe default
     },
     lowStockThreshold: {
       type: Number,
@@ -85,15 +101,15 @@ const productSchema = new mongoose.Schema(
     ],
     specifications: {
       type: Map,
-      of: String,
+      of: String, // Dynamic key-value pairs (e.g., Material: Plastic, Color: Black)
     },
     warrantyPeriod: {
-      type: String, // e.g., "6 months", "1 year"
-      default: '6 months',
+      type: String, 
+      default: 'No Warranty',
     },
     manufacturer: {
       type: String,
-      default: 'Hyundai',
+      default: 'Hyundai Mobis', // Hyundai Genuine Parts usually come from Mobis
     },
     isActive: {
       type: Boolean,
@@ -137,9 +153,17 @@ const productSchema = new mongoose.Schema(
 );
 
 /**
- * Update stock status before saving
+ * PRE-SAVE HOOK
+ * 1. Generate sanitizedPartNumber for better search
+ * 2. Update stockStatus based on quantity
  */
 productSchema.pre('save', function (next) {
+  // Logic 1: Sanitize Part Number (Remove special chars)
+  if (this.isModified('partNumber')) {
+    this.sanitizedPartNumber = this.partNumber.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  }
+
+  // Logic 2: Update Stock Status
   if (this.isModified('stock')) {
     if (this.stock === 0) {
       this.stockStatus = 'Out of Stock';
@@ -153,21 +177,28 @@ productSchema.pre('save', function (next) {
 });
 
 /**
- * Index for searching products
+ * INDEXES
+ * Crucial for fast search performance in E-commerce
  */
-productSchema.index({ name: 'text', description: 'text', partNumber: 'text' });
+productSchema.index({ name: 'text', description: 'text', sanitizedPartNumber: 'text' });
 productSchema.index({ category: 1, isActive: 1, isDeleted: 1 });
-productSchema.index({ compatibleModels: 1 });
+// Index inside the array of objects for filtering
+productSchema.index({ "compatibleModels.modelName": 1, "compatibleModels.yearFrom": 1 });
 
 /**
- * Virtual for final price (considering discount)
+ * VIRTUALS
  */
 productSchema.virtual('finalPrice').get(function () {
   return this.discountPrice || this.price;
 });
 
+// Allow virtuals to show up in JSON response
+productSchema.set('toJSON', { virtuals: true });
+productSchema.set('toObject', { virtuals: true });
+
 /**
- * Exclude soft-deleted products by default
+ * QUERY MIDDLEWARE
+ * Exclude soft-deleted products automatically
  */
 productSchema.pre(/^find/, function (next) {
   this.where({ isDeleted: false });

@@ -5,6 +5,7 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 ## 🚀 Features
 
 ### 🔐 Authentication & Authorization
+
 - JWT-based authentication (Access + Refresh tokens)
 - Role-based access control (Admin & Customer)
 - Secure password hashing with bcrypt
@@ -12,6 +13,7 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 - Protected routes with middleware
 
 ### 📦 Product Management
+
 - Complete CRUD operations for products
 - Multiple image upload with Cloudinary
 - Categories: Engine, Brake, Electrical, Body, Accessories, etc.
@@ -21,6 +23,7 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 - Soft delete functionality
 
 ### 🛒 Shopping Cart
+
 - Add/Update/Remove items
 - Automatic price calculations
 - GST calculation (18%)
@@ -29,6 +32,7 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 - Cart synchronization
 
 ### 📋 Order Management
+
 - Place orders (COD & Razorpay)
 - Order status tracking (Placed → Packed → Shipped → Delivered)
 - Order cancellation
@@ -37,6 +41,7 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 - Admin order management
 
 ### 💳 Payment Integration
+
 - Razorpay payment gateway integration
 - Payment verification with signature validation
 - COD support
@@ -44,12 +49,14 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 - Payment history
 
 ### 📄 Invoice System
+
 - Automatic PDF invoice generation
 - GST invoice format
 - Invoice download API
 - Professional invoice template
 
 ### 📊 Admin Dashboard
+
 - Real-time statistics
 - Revenue analytics (Daily/Monthly)
 - Order management
@@ -59,6 +66,7 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 - Sales by category
 
 ### 🔔 Real-Time Features (Socket.io)
+
 - Live order status updates
 - New order notifications to admin
 - Payment status notifications
@@ -75,17 +83,20 @@ A complete, production-ready backend for a real-time Hyundai spare parts e-comme
 ## 🛠️ Installation
 
 ### 1. Clone the repository
+
 ```bash
 git clone <repository-url>
 cd hyundai-spares-backend
 ```
 
 ### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Environment Configuration
+
 Create a `.env` file in the root directory:
 
 ```env
@@ -120,7 +131,9 @@ ADMIN_PASSWORD=Admin@12345
 ```
 
 ### 4. Start MongoDB
+
 Make sure MongoDB is running on your system:
+
 ```bash
 # For local MongoDB
 mongod
@@ -132,11 +145,13 @@ docker run -d -p 27017:27017 --name mongodb mongo:latest
 ### 5. Run the application
 
 **Development mode:**
+
 ```bash
 npm run dev
 ```
 
 **Production mode:**
+
 ```bash
 npm start
 ```
@@ -204,6 +219,7 @@ After first run, a default admin account is created:
 ## 📡 API Endpoints
 
 ### Authentication (User)
+
 ```
 POST   /api/auth/register          - Register new user
 POST   /api/auth/login             - User login
@@ -218,6 +234,7 @@ POST   /api/auth/logout            - Logout user
 ```
 
 ### Authentication (Admin)
+
 ```
 POST   /api/admin/auth/login              - Admin login
 POST   /api/admin/auth/refresh-token      - Refresh access token
@@ -228,6 +245,7 @@ POST   /api/admin/auth/logout             - Logout admin
 ```
 
 ### Products
+
 ```
 GET    /api/products                      - Get all products (with filters)
 GET    /api/products/:id                  - Get product by ID
@@ -242,6 +260,7 @@ GET    /api/products/low-stock            - Get low stock products (Admin)
 ```
 
 ### Cart
+
 ```
 GET    /api/cart                   - Get user cart
 POST   /api/cart/add               - Add item to cart
@@ -252,6 +271,7 @@ POST   /api/cart/sync              - Sync cart
 ```
 
 ### Orders
+
 ```
 POST   /api/orders                 - Create order
 GET    /api/orders                 - Get user orders
@@ -263,6 +283,7 @@ PUT    /api/orders/:id/status      - Update order status (Admin)
 ```
 
 ### Payments
+
 ```
 POST   /api/payments/create-razorpay-order     - Create Razorpay order
 POST   /api/payments/verify-razorpay-payment   - Verify payment
@@ -273,6 +294,7 @@ GET    /api/payments/admin/all                 - Get all payments (Admin)
 ```
 
 ### Dashboard (Admin Only)
+
 ```
 GET    /api/dashboard/stats                - Get dashboard statistics
 GET    /api/dashboard/revenue/monthly      - Get monthly revenue
@@ -288,36 +310,38 @@ GET    /api/dashboard/payments/methods     - Get payment method stats
 ## 🔌 Socket.io Events
 
 ### Client → Server
+
 ```javascript
 // Authentication (via handshake)
-socket.auth = { token: 'your-jwt-token' };
+socket.auth = { token: "your-jwt-token" };
 
 // Join order room
-socket.emit('join_order_room', orderId);
+socket.emit("join_order_room", orderId);
 
 // Leave order room
-socket.emit('leave_order_room', orderId);
+socket.emit("leave_order_room", orderId);
 ```
 
 ### Server → Client
+
 ```javascript
 // Connection success
-socket.on('connected', (data) => {});
+socket.on("connected", (data) => {});
 
 // Order placed
-socket.on('order_placed', (data) => {});
+socket.on("order_placed", (data) => {});
 
 // Order status updated
-socket.on('order_status_updated', (data) => {});
+socket.on("order_status_updated", (data) => {});
 
 // Payment success
-socket.on('payment_success', (data) => {});
+socket.on("payment_success", (data) => {});
 
 // Payment failed
-socket.on('payment_failed', (data) => {});
+socket.on("payment_failed", (data) => {});
 
 // New order (Admin only)
-socket.on('new_order', (data) => {});
+socket.on("new_order", (data) => {});
 ```
 
 ## 🔒 Security Features
@@ -334,12 +358,14 @@ socket.on('new_order', (data) => {});
 ## 📊 Database Models
 
 ### User
+
 - Personal information
 - Multiple addresses
 - Authentication credentials
 - Role-based access
 
 ### Product
+
 - Product details
 - Multiple images
 - Stock management
@@ -347,6 +373,7 @@ socket.on('new_order', (data) => {});
 - Pricing & discounts
 
 ### Order
+
 - Order items
 - Shipping address
 - Payment details
@@ -354,6 +381,7 @@ socket.on('new_order', (data) => {});
 - Invoice information
 
 ### Payment
+
 - Payment method
 - Razorpay details
 - Transaction status
@@ -362,6 +390,7 @@ socket.on('new_order', (data) => {});
 ## 🧪 Testing
 
 Test the API using tools like:
+
 - Postman
 - Thunder Client (VS Code)
 - Insomnia
@@ -372,18 +401,22 @@ Import the API endpoints and test with proper authentication headers.
 ## 🚀 Deployment
 
 ### Environment Variables
+
 Set all required environment variables in your hosting platform.
 
 ### MongoDB
+
 - Use MongoDB Atlas for production
 - Enable IP whitelist
 - Create database user
 
 ### Cloudinary
+
 - Sign up for free account
 - Get API credentials from dashboard
 
 ### Razorpay
+
 - Create account and verify business
 - Generate API keys from dashboard
 - Test with test mode first

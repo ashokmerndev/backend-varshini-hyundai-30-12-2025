@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 /**
  * Admin Schema
  * Stores admin user information with authentication credentials
+ * Updated to support extended profile and notification settings
  */
 const adminSchema = new mongoose.Schema(
   {
@@ -22,6 +23,37 @@ const adminSchema = new mongoose.Schema(
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         'Please provide a valid email',
       ],
+    },
+    // Frontend లో అదనంగా యాడ్ చేసిన ఫీల్డ్స్
+    avatar: {
+      type: String, // ఇమేజ్ URL ని స్టోర్ చేస్తుంది (Cloudinary/S3 నుండి)
+      default: '',
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Bio cannot be more than 500 characters'],
+      default: '',
+    },
+    // నోటిఫికేషన్ సెట్టింగ్స్ కోసం నెస్టెడ్ ఆబ్జెక్ట్
+    notifications: {
+      emailAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      securityAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      marketingEmails: {
+        type: Boolean,
+        default: false,
+      },
     },
     password: {
       type: String,
@@ -47,7 +79,7 @@ const adminSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // createdAt, updatedAt ఆటోమేటిక్ గా వస్తాయి
   }
 );
 

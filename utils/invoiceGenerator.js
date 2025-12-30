@@ -32,15 +32,15 @@ export const generateInvoice = async (order) => {
       doc
         .fontSize(20)
         .font('Helvetica-Bold')
-        .text('HYUNDAI SPARES', 50, 50);
+        .text('VARSHINI HYUNDAI SPARES', 50, 50);
 
       doc
         .fontSize(10)
         .font('Helvetica')
         .text('Authorized Spare Parts Dealer', 50, 75)
-        .text('123 Auto Parts Street, Mumbai, Maharashtra 400001', 50, 90)
+        .text('123 Auto Parts Street, HYDERABAD, UPPAL 532428', 50, 90)
         .text('Phone: +91 98765 43210', 50, 105)
-        .text('Email: info@hyundaispares.com', 50, 120)
+        .text('Email: varshinihyundai@gmail.com', 50, 120)
         .text('GSTIN: 27AABCU9603R1ZM', 50, 135);
 
       // Invoice Title
