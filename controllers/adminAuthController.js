@@ -198,8 +198,9 @@
 
 import { asyncHandler, AppError } from '../utils/errorHandler.js';
 import { generateTokenPair, verifyRefreshToken } from '../utils/jwt.js';
-import { sendSuccess } from '../utils/response.js';
+import { sendSuccess,sendPaginatedResponse } from '../utils/response.js';
 import Admin from '../models/Admin.js';
+import User from '../models/User.js';
 // Cloudinary config file unte import chesukondi, lekapothe comment lo unna logic chudandi
 import {cloudinary} from '../config/cloudinary.js'; 
 
@@ -453,4 +454,54 @@ export const logoutAllSessions = asyncHandler(async (req, res) => {
     }
   
     sendSuccess(res, 200, 'Logged out from all devices successfully');
+});
+
+
+/**
+ * @desc    Get All Customers (Admin)
+ * @route   GET /api/admin/users
+ * @access  Private (Admin)
+ */
+export const getAllCustomers = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10, search } = req.query;
+
+  const query = { role: 'customer' }; // Only fetch customers, not admins
+
+  // Search logic (Name, Email, Phone)
+  if (search) {
+    query.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { phone: { $regex: search, $options: 'i' } },
+    ];
+  }
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  // Fetch users with their addresses to show location
+  const customers = await User.find(query)
+    .select('-password') // Don't send password
+    .populate('addresses') // To get location (City, State)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(Number(limit));
+
+  const total = await User.countDocuments(query);
+  
+  // Calculate stats for the cards (Total, Verified, With Address)
+  const totalCustomers = await User.countDocuments({ role: 'customer' });
+  const verifiedEmails = await User.countDocuments({ role: 'customer', isEmailVerified: true });
+  // Note: This address count query assumes 'addresses' is an array in User model
+  const withAddresses = await User.countDocuments({ role: 'customer', addresses: { $exists: true, $not: { $size: 0 } } });
+
+  sendPaginatedResponse(res, 200, 'Customers retrieved successfully', customers, {
+    total,
+    page: Number(page),
+    limit: Number(limit),
+    stats: {
+        total: totalCustomers,
+        verified: verifiedEmails,
+        withAddress: withAddresses
+    }
+  });
 });

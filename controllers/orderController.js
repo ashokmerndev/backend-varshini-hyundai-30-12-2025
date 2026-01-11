@@ -7,6 +7,7 @@ import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 import Payment from '../models/Payment.js';
 import { emitToUser, emitToAdmins } from '../sockets/socketHandler.js';
+import { notify } from './notificationController.js'; // 👈 Import Helper
 
 /**
  * @desc    Create Order (With Atomic Transaction)
@@ -223,7 +224,7 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   }
 
   // Check authorization
-  if (order.user.toString() !== req.user._id.toString()) {
+  if (order.user._id.toString() !== req.user._id.toString()) {
     throw new AppError('Not authorized to cancel this order', 403);
   }
 

@@ -13,6 +13,8 @@ import {
   deleteAddress,
   refreshUserToken,
   logoutUser,
+  forgotPassword,
+   resetPassword,
 } from '../controllers/authController.js';
 
 const router = express.Router();
@@ -167,5 +169,8 @@ router.delete('/address/:addressId', protect, customerOnly, deleteAddress);
  * @access  Private (Customer)
  */
 router.post('/logout', protect, customerOnly, logoutUser);
+
+router.post('/forgot-password', forgotPassword);
+router.patch('/reset-password/:token', resetPassword);
 
 export default router;

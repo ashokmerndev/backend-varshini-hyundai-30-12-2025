@@ -11,10 +11,27 @@ const adminSockets = new Set(); // Set of admin socketIds
  * Initialize Socket.io Server
  * @param {Object} server - HTTP server instance
  */
+// export const initializeSocket = (server) => {
+//   io = new Server(server, {
+//     cors: {
+//       origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+//       credentials: true,
+//       methods: ['GET', 'POST'],
+//     },
+//     pingTimeout: 60000,
+//     pingInterval: 25000,
+//   });
+
+
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      // ✅ Allow both ports 3000 and 3001
+      origin: [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        process.env.FRONTEND_URL
+      ].filter(Boolean),
       credentials: true,
       methods: ['GET', 'POST'],
     },

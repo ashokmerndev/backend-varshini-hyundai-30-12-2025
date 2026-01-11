@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 /**
  * User Schema
@@ -84,6 +85,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
@@ -143,6 +146,25 @@ userSchema.methods.toJSON = function () {
   return user;
 };
 
-const User = mongoose.model('User', userSchema);
 
+// పాస్‌వర్డ్ రీసెట్ టోకెన్ జనరేట్ చేసే మెథడ్
+userSchema.methods.createPasswordResetToken = function () {
+  // 1. రండమ్ గా 32 అక్షరాల స్ట్రింగ్ ని క్రియేట్ చేస్తాం (Raw Token)
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  // 2. ఆ టోకెన్ ని HASH (సెక్యూరిటీ కోసం మార్చి) చేసి డేటాబేస్ లో స్టోర్ చేస్తాం
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // 3. టోకెన్ టైమ్ లిమిట్ సెట్ చేస్తాం (10 నిమిషాలు)
+  // Date.now() + 10 mins * 60 seconds * 1000 milliseconds
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // 4. ఇమెయిల్ లో పంపడానికి "Raw Token" ని రిటర్న్ చేస్తాం (Hash చేసినది కాదు)
+  return resetToken;
+};
+
+const User = mongoose.model('User', userSchema);
 export default User;

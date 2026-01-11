@@ -12,6 +12,7 @@ import {
   refreshAdminToken,
   adminLogout,
   logoutAllSessions,
+  getAllCustomers
 } from '../controllers/adminAuthController.js';
 
 const router = express.Router();
@@ -117,5 +118,8 @@ router.post('/logout', protect, adminOnly, adminLogout);
  * @access  Private (Admin)
  */
 router.post('/logout-all', protect, adminOnly, logoutAllSessions);
+
+
+router.get('/users', protect, adminOnly, getAllCustomers);
 
 export default router;

@@ -16,15 +16,21 @@ export const protect = asyncHandler(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+   
+  } 
+  // 2. Check for token in Cookies (ADDED THIS)
+  else if (req.cookies && req.cookies.accessToken) {
+    token = req.cookies.accessToken;
+   
   }
 
-  // 2. Check if token exists
+  // 3. Check if token exists
   if (!token) {
+    
     return next(new AppError('Not authorized. Please login to access this resource.', 401));
   }
 
-  // 3. Verify Token (Isolated Try-Catch)
-  // We check this separately so we can distinguish between "Bad Token" and "User Not Found"
+  // 4. Verify Token (Isolated Try-Catch)
   let decoded;
   try {
     decoded = verifyAccessToken(token);
@@ -32,7 +38,7 @@ export const protect = asyncHandler(async (req, res, next) => {
     return next(new AppError('Not authorized. Invalid token.', 401));
   }
 
-  // 4. Check User Type and Database (No Try-Catch here, let asyncHandler catch DB errors)
+  // 5. Check User Type and Database
   if (decoded.role === 'admin' || decoded.role === 'superadmin') {
     const admin = await Admin.findById(decoded.id).select('-password');
     
@@ -66,7 +72,6 @@ export const protect = asyncHandler(async (req, res, next) => {
 
 /**
  * Admin Only Middleware
- * Restrict access to admin users only
  */
 export const adminOnly = asyncHandler(async (req, res, next) => {
   if (!req.user || req.userType !== 'admin') {
@@ -78,7 +83,6 @@ export const adminOnly = asyncHandler(async (req, res, next) => {
 
 /**
  * Customer Only Middleware
- * Restrict access to customer users only
  */
 export const customerOnly = asyncHandler(async (req, res, next) => {
   if (!req.user || req.userType !== 'customer') {
@@ -90,16 +94,20 @@ export const customerOnly = asyncHandler(async (req, res, next) => {
 
 /**
  * Optional Authentication
- * Attaches user to request if token is valid, but doesn't require it
  */
 export const optionalAuth = asyncHandler(async (req, res, next) => {
   let token;
 
+  // Check Header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } 
+  // Check Cookie (ADDED THIS)
+  else if (req.cookies && req.cookies.accessToken) {
+    token = req.cookies.accessToken;
   }
 
   if (token) {
@@ -120,8 +128,7 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
         }
       }
     } catch (error) {
-      // Token is invalid/expired, but we don't crash.
-      // We just continue as a "Guest" (req.user remains undefined)
+      // Token invalid aithe parvaledu, Guest ga continue avtaru
     }
   }
 
