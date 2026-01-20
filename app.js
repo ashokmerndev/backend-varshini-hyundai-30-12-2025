@@ -35,7 +35,8 @@ const app = express();
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:3000',
-  'http://localhost:3001'
+  'http://localhost:3001',
+  'https://custoer-panel-varshini-hyundai-11-0.vercel.app/'
 ];
 
 app.use(cors({
